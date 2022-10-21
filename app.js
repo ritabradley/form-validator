@@ -5,69 +5,65 @@ const password = document.querySelector('#password');
 const passwordConfirmation = document.querySelector('#password-confirmation');
 
 const showError = (input, msg) => {
-    const formControl = input.parentElement;
-    const small = formControl.querySelector('small');
-    formControl.classList.add('error');
-    small.textContent = msg;
+	const formControl = input.parentElement;
+	const small = formControl.querySelector('small');
+	formControl.classList.add('error');
+	small.textContent = msg;
 };
 
 const showSuccess = (input) => {
-    const formControl = input.parentElement;
-    formControl.classList.add('success');
+	const formControl = input.parentElement;
+	formControl.classList.add('success');
 };
 
-const isValidEmail = (email) => {
-    return String(email)
-        .toLowerCase()
-        .match(
-            /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-        );
+const checkEmail = (input) => {
+	const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+	if (re.test(input)) {
+		showSuccess(input)
+	} else {
+		showError(input, 'Email address is invalid. ')
+	}
 };
 
-const validateUsername = (username) => {
-    if (username.value === '') {
-        showError(username, 'Username is required');
-    } else if (username.value.length < 3) {
-        showError(username, 'Username must be at least 3 characters long');
-    } else {
-        showSuccess(username);
-    }
+const checkPasswordMatch = (input1, input2) => {
+	if (input1.value !== input2.value) {
+		showError(input1, 'Passwords must match');
+	} else {
+		showSuccess(input1);
+	}
 };
 
-const validateEmail = (email) => {
-    if (email.value === '') {
-        showError(email, 'Email is required');
-    } else if (!isValidEmail(email.value)) {
-        showError(email, 'Invalid email address');
-    } else {
-        showSuccess(email);
-    }
-};
+const getFieldName = input => {
+	const firstLetter = input.id.charAt(0).toUpperCase();
+	return firstLetter + input.id.slice(1);
+}
 
-const validatePassword = (password) => {
-    if (password.value === '') {
-        showError(password, 'Password is required');
-    } else if (password.value.length < 8) {
-        showError(password, 'Password must be at least 8 characters long');
-    } else {
-        showSuccess(password);
-    }
-};
+const checkLength = (input, min, max) => {
+	if (input.value.length < min || input.value.length > max) {
+		showError(input, `${getFieldName(input)} must be between ${min} and ${max} characters long`);
+	}
+}
 
-const validatePasswordConfirmation = (passwordConfirmation) => {
-    validatePassword(passwordConfirmation);
-    if (passwordConfirmation.value !== password.value) {
-        showError(passwordConfirmation, 'Passwords must match');
-    } else {
-        showSuccess(passwordConfirmation);
-    }
-};
+const checkRequired = inputArr => {
+	inputArr.forEach(input => {
+		if (input.value.trim() === '') {
+			showError(input, `${getFieldName(input)} is required`);
+		} else {
+			showSuccess(input);
+		}
+	})
+}
+
+const validateForm = () => {
+	checkRequired([username, email, password, passwordConfirmation]);
+	checkLength(username, 3, 20);
+	checkLength(password, 8, 30);
+	checkEmail(email)
+	checkPasswordMatch(passwordConfirmation, password)
+}
+
 
 form.addEventListener('submit', function (e) {
-    e.preventDefault();
-
-    validateUsername(username);
-    validateEmail(email);
-    validatePassword(password);
-    validatePasswordConfirmation(passwordConfirmation);
+	e.preventDefault();
+	validateForm();
 });
